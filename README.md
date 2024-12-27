@@ -12,7 +12,8 @@ This repository contains the components of a database management project focused
 
 ## Project Overview
 The goal of this project is to design and implement a relational database for managing anime-related data. This includes creating tables, relationships, and views while providing sample data for demonstration and testing. 
-### Key Objectives:
+
+#### Key Objectives:
 * Organize anime data efficiently using relational database principles.
 * Provide an ER diagram for database structure visualization.
 * Demonstrate table creation, data population, and view creation.
@@ -52,7 +53,7 @@ The goal of this project is to design and implement a relational database for ma
 The database structure is visualized in the ER_Diagram.png shown below: 
 ![Entity-Relationship Diagram](ER_Diagram.png)
 
-### Key Features
+#### Key Features
 * Many-to-Many relationships are implemented using join tables.
 * Efficient normalization of data to reduce redundancy.
 
