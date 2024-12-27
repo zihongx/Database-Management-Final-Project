@@ -1,0 +1,238 @@
+create sequence SEQ_ZX_ANIME_anime;
+
+insert into ZX_ANIME_type(type_pk,name_tx)
+select  SEQ_ZX_ANIME_type.nextval,ani_type
+from(
+    select distinct(type) ani_type
+    from anime_stage
+    minus
+    select name_tx
+    from zx_anime_type
+    );
+
+insert into zx_anime_anime(anime_pk, anime_id, title, rating, scoredby, popularity, members,
+            episodes, aired, link, source_fk, type_fk)
+select SEQ_ZX_ANIME_anime.nextval, anime_id, title, rating, scoredby, popularity, members,
+            episodes, aired, link, source_pk, type_pk
+from( 
+        select anime_id, title, rating, scoredby, popularity, members,
+            episodes, aired, link, source_pk, type_pk
+        from anime_stage stage
+        join zx_anime_source s
+        on stage.source = s.name_tx
+        join zx_anime_type t
+        on stage.type = t.name_tx
+        minus
+        select anime_id, title, rating, scoredby, popularity, members,
+            episodes, aired, link, source_fk, type_fk
+        from zx_anime_anime
+        );
+
+
+--------------genre, producer, studio (list to values) -------------
+
+-- remove the brakect
+select replace(replace(replace(genre,''''),'['),']')
+from anime_stage
+where anime_id =46;
+
+-- 
+select * from zx_anime_producer;
+create sequence seq_zx_anime_producer;
+
+insert into zx_anime_genre(genre_pk, name_tx)
+select seq_zx_anime_genre.nextval, genre
+from (
+
+        SELECT   Trim(data_single) genre
+        FROM   (--A Open
+               -------------------------this is the data from STAGE -------------------------
+               --simply copy/paste this block and change the column name to match the column you are splitting
+               ---change "listed_in" to whatever the column is that you want to split
+               ---If delimiter is not a "comma", need to change that also
+               ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
+               SELECT Regexp_substr(replace(replace(replace(genre,''''),'['),']'), '[^,]+', 1, dataList.column_value)
+                      data_single
+                FROM   anime_stage a,--change to match your stage table
+                       TABLE (Cast (MULTISET (SELECT LEVEL
+                                       FROM   dual
+                                       CONNECT BY Instr(replace(replace(replace(genre,''''),'['),']'), ',', 1, LEVEL - 1) >
+                                                  0) AS
+                                    sys.ODCINUMBERLIST) ) dataList
+               -------------------------this is the data from STAGE -------------------------
+               )--A Close
+        WHERE  Trim(data_single) IS NOT NULL 
+        minus
+        select name_tx
+        from zx_anime_genre
+);
+
+
+insert into zx_anime_producer(producer_pk, name_tx)
+select seq_zx_anime_producer.nextval, producer
+from (
+
+        SELECT   Trim(data_single) producer
+        FROM   (--A Open
+               -------------------------this is the data from STAGE -------------------------
+               --simply copy/paste this block and change the column name to match the column you are splitting
+               ---change "listed_in" to whatever the column is that you want to split
+               ---If delimiter is not a "comma", need to change that also
+               ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
+               SELECT Regexp_substr(replace(replace(replace(producer,''''),'['),']'), '[^,]+', 1, dataList.column_value)
+                      data_single
+                FROM   anime_stage a,--change to match your stage table
+                       TABLE (Cast (MULTISET (SELECT LEVEL
+                                       FROM   dual
+                                       CONNECT BY Instr(replace(replace(replace(producer,''''),'['),']'), ',', 1, LEVEL - 1) >
+                                                  0) AS
+                                    sys.ODCINUMBERLIST) ) dataList
+               -------------------------this is the data from STAGE -------------------------
+               )--A Close
+        WHERE  Trim(data_single) IS NOT NULL 
+        minus
+        select name_tx
+        from zx_anime_producer
+);
+
+create sequence seq_zx_anime_studio;
+
+insert into zx_anime_studio(studio_pk, name_tx)
+select seq_zx_anime_studio.nextval, studio
+from (
+
+        SELECT   Trim(data_single) studio
+        FROM   (--A Open
+               -------------------------this is the data from STAGE -------------------------
+               --simply copy/paste this block and change the column name to match the column you are splitting
+               ---change "listed_in" to whatever the column is that you want to split
+               ---If delimiter is not a "comma", need to change that also
+               ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
+               SELECT Regexp_substr(replace(replace(replace(studio,''''),'['),']'), '[^,]+', 1, dataList.column_value)
+                      data_single
+                FROM   anime_stage a,--change to match your stage table
+                       TABLE (Cast (MULTISET (SELECT LEVEL
+                                       FROM   dual
+                                       CONNECT BY Instr(replace(replace(replace(studio,''''),'['),']'), ',', 1, LEVEL - 1) >
+                                                  0) AS
+                                    sys.ODCINUMBERLIST) ) dataList
+               -------------------------this is the data from STAGE -------------------------
+               )--A Close
+        WHERE  Trim(data_single) IS NOT NULL 
+        minus
+        select name_tx
+        from zx_anime_studio
+);
+
+
+
+----------------------------insert an_genre, an_producer, an_studio table----------------------------------------------------
+create sequence seq_zx_anime_an_genre;
+
+insert into zx_anime_an_genre(an_genre_pk, anime_fk, genre_fk)
+ 
+     select seq_zx_anime_an_genre.nextval,  anime_pk,   genre_pk
+     from (select  zx_anime_anime.anime_pk,  zx_anime_genre.genre_pk
+                from (SELECT distinct anime_id, Trim(data_single) genre
+                            FROM   (--A Open
+                                   -------------------------this is the data from STAGE -------------------------
+                                   --simply copy/paste this block and change the column name to match the column you are splitting
+                                   ---change "listed_in" to whatever the column is that you want to split
+                                   ---If delimiter is not a "comma", need to change that also
+                                   ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
+                                   SELECT anime_id,  Regexp_substr(replace(replace(replace(genre,''''),'['),']'), '[^,]+', 1, dataList.column_value)
+                                          data_single
+                                    FROM   anime_stage a,--change to match your stage table
+                                           TABLE (Cast (MULTISET (SELECT LEVEL
+                                                           FROM   dual
+                                                           CONNECT BY Instr(replace(replace(replace(genre,''''),'['),']'), ',', 1, LEVEL - 1) >
+                                                                      0) AS
+                                                        sys.ODCINUMBERLIST) ) dataList
+                                   -------------------------this is the data from STAGE -------------------------
+                                   )--A Close
+                            WHERE  Trim(data_single) IS NOT NULL 
+                    ) stageData
+                      join zx_anime_anime
+                    on (stageData.anime_id = zx_anime_anime.anime_id)
+                      join zx_anime_genre
+                    on (stageData.genre = zx_anime_genre.name_tx)
+                    minus
+                    select anime_fk, genre_fk 
+                   from zx_anime_an_genre
+       );
+
+
+select * from zx_anime_an_producer;
+create sequence seq_zx_anime_an_producer;
+
+
+insert into zx_anime_an_producer(an_producer_pk, anime_fk, producer_fk)
+ 
+     select seq_zx_anime_an_producer.nextval,  anime_pk,   producer_pk
+     from (select  zx_anime_anime.anime_pk,  zx_anime_producer.producer_pk
+                from (SELECT distinct anime_id, Trim(data_single) producer
+                            FROM   (--A Open
+                                   -------------------------this is the data from STAGE -------------------------
+                                   --simply copy/paste this block and change the column name to match the column you are splitting
+                                   ---change "listed_in" to whatever the column is that you want to split
+                                   ---If delimiter is not a "comma", need to change that also
+                                   ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
+                                   SELECT anime_id,  Regexp_substr(replace(replace(replace(producer,''''),'['),']'), '[^,]+', 1, dataList.column_value)
+                                          data_single
+                                    FROM   anime_stage a,--change to match your stage table
+                                           TABLE (Cast (MULTISET (SELECT LEVEL
+                                                           FROM   dual
+                                                           CONNECT BY Instr(replace(replace(replace(producer,''''),'['),']'), ',', 1, LEVEL - 1) >
+                                                                      0) AS
+                                                        sys.ODCINUMBERLIST) ) dataList
+                                   -------------------------this is the data from STAGE -------------------------
+                                   )--A Close
+                            WHERE  Trim(data_single) IS NOT NULL 
+                    ) stageData
+                      join zx_anime_anime
+                    on (stageData.anime_id = zx_anime_anime.anime_id)
+                      join zx_anime_producer
+                    on (stageData.producer = zx_anime_producer.name_tx)
+                    minus
+                    select anime_fk, producer_fk 
+                   from zx_anime_an_producer
+       );
+       
+       
+select * from zx_anime_an_studio;
+create sequence seq_zx_anime_an_studio;
+
+
+insert into zx_anime_an_studio(an_studio_pk, anime_fk, studio_fk)
+ 
+     select seq_zx_anime_an_studio.nextval,  anime_pk,   studio_pk
+     from (select  zx_anime_anime.anime_pk,  zx_anime_studio.studio_pk
+                from (SELECT distinct anime_id, Trim(data_single) studio
+                            FROM   (--A Open
+                                   -------------------------this is the data from STAGE -------------------------
+                                   --simply copy/paste this block and change the column name to match the column you are splitting
+                                   ---change "listed_in" to whatever the column is that you want to split
+                                   ---If delimiter is not a "comma", need to change that also
+                                   ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
+                                   SELECT anime_id,  Regexp_substr(replace(replace(replace(studio,''''),'['),']'), '[^,]+', 1, dataList.column_value)
+                                          data_single
+                                    FROM   anime_stage a,--change to match your stage table
+                                           TABLE (Cast (MULTISET (SELECT LEVEL
+                                                           FROM   dual
+                                                           CONNECT BY Instr(replace(replace(replace(studio,''''),'['),']'), ',', 1, LEVEL - 1) >
+                                                                      0) AS
+                                                        sys.ODCINUMBERLIST) ) dataList
+                                   -------------------------this is the data from STAGE -------------------------
+                                   )--A Close
+                            WHERE  Trim(data_single) IS NOT NULL 
+                    ) stageData
+                      join zx_anime_anime
+                    on (stageData.anime_id = zx_anime_anime.anime_id)
+                      join zx_anime_studio
+                    on (stageData.studio = zx_anime_studio.name_tx)
+                    minus
+                    select anime_fk, studio_fk 
+                   from zx_anime_an_studio
+       );
+
+
