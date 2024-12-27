@@ -20,15 +20,13 @@ The goal of this project is to design and implement a relational database for ma
 ## Folder and File Structure
 | File Name     |Description                                        |
 |-----------------------|-------------------------------------------|
-| `Anime Stage.csv`     | Contains sample data for anime records.   
-                                    |
+| `Anime Stage.csv`     | Contains sample data for anime records.  |
 | `Anime-Data-Report.pdf` | Detailed report explaining the project's purpose, design, and outcomes.     |
 | `ER_Diagram.png`      | Entity-Relationship diagram visualizing the database schema.                   |
 | `Populating_data`     | SQL script or instructions for populating tables with sample data.            |
 | `README.md`           | Documentation file providing project details.                             |
 | `Table_creation`      | SQL script for creating database tables and relationships.                        |
-| `Views`               | SQL script for creating database views.
-                                    |
+| `Views`               | SQL script for creating database views. |
 
 
 ## Setup and Installation
