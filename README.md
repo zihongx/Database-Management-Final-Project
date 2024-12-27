@@ -9,12 +9,14 @@ This repository contains the components of a database management project focused
 5. [How to use](#how-to-use)
 
 
+
 ## Project Overview
 The goal of this project is to design and implement a relational database for managing anime-related data. This includes creating tables, relationships, and views while providing sample data for demonstration and testing. 
 ### Key Objectives:
 * Organize anime data efficiently using relational database principles.
 * Provide an ER diagram for database structure visualization.
 * Demonstrate table creation, data population, and view creation.
+
 
 
 ## Folder and File Structure
@@ -29,17 +31,20 @@ The goal of this project is to design and implement a relational database for ma
 | `Views`               | SQL script for creating database views. |
 
 
+
 ## Setup and Installation
-### 1. Clone the Repository
+#### 1. Clone the Repository
 * Download the data file 'ANIME_STAGE.CS'
-### 2. Set Up the Database
+#### 2. Set Up the Database
 * Install a database management system (DBMS) such as Oracle SQL Developer.
 * Use the 'Table_creation' file to create the database schema.
-### 3. Populate the Database
+#### 3. Populate the Database
 * Run the Populating_data script to insert Anime_Stage data into the tables. 
-### 4. Verify Views
+#### 4. Verify Views
 * Execute the Views script to create pre-defined database views.
 * Run the testing file to see the views.
+
+
 
 ## Database Design
 ### ER Diagram
@@ -49,6 +54,8 @@ The database structure is visualized in the ER_Diagram.png shown below:
 ### Key Features
 * Many-to-Many relationships are implemented using join tables.
 * Efficient normalization of data to reduce redundancy.
+
+
 
 ## How to Use
 1. Query the database to retrieve anime data based on various criteria.
