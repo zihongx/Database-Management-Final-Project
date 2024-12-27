@@ -1,47 +1,63 @@
-create sequence SEQ_ZX_ANIME_anime;
 
-insert into ZX_ANIME_type(type_pk,name_tx)
-select  SEQ_ZX_ANIME_type.nextval,ani_type
+--- ANIME_SOURCE TABLE ---
+create sequence SEQ_ANIME_source;
+
+insert into ANIME_source(source_pk,source_tx)
+select  SEQ_ANIME_source.nextval,ani_source
+from(
+    select distinct(type) ani_source
+    from anime_stage
+    minus
+    select source_tx
+    from anime_source
+    );
+
+
+
+
+--- ANIME_TYPE TABLE ---
+create sequence SEQ_ANIME_type;
+
+insert into ANIME_type(type_pk,type_tx)
+select  SEQ_ANIME_type.nextval,ani_type
 from(
     select distinct(type) ani_type
     from anime_stage
     minus
-    select name_tx
-    from zx_anime_type
+    select type_tx
+    from anime_type
     );
 
-insert into zx_anime_anime(anime_pk, anime_id, title, rating, scoredby, popularity, members,
+
+--- ANIME_ANIME table ---
+create sequence SEQ_ANIME_anime;
+insert into anime_anime(anime_pk, anime_id, title, rating, scoredby, popularity, members,
             episodes, aired, link, source_fk, type_fk)
-select SEQ_ZX_ANIME_anime.nextval, anime_id, title, rating, scoredby, popularity, members,
+select SEQ_ANIME_anime.nextval, anime_id, title, rating, scoredby, popularity, members,
             episodes, aired, link, source_pk, type_pk
 from( 
         select anime_id, title, rating, scoredby, popularity, members,
             episodes, aired, link, source_pk, type_pk
         from anime_stage stage
-        join zx_anime_source s
+        join anime_source s
         on stage.source = s.name_tx
-        join zx_anime_type t
+        join anime_type t
         on stage.type = t.name_tx
         minus
         select anime_id, title, rating, scoredby, popularity, members,
             episodes, aired, link, source_fk, type_fk
-        from zx_anime_anime
+        from anime_anime
         );
 
 
---------------genre, producer, studio (list to values) -------------
+--------------Genre, Producer, Studio (list to values) -------------
 
--- remove the brakect
-select replace(replace(replace(genre,''''),'['),']')
-from anime_stage
-where anime_id =46;
 
--- 
-select * from zx_anime_producer;
-create sequence seq_zx_anime_producer;
+--- Anime_Genre Table --- 
+create sequence seq_anime_genre;
 
-insert into zx_anime_genre(genre_pk, name_tx)
-select seq_zx_anime_genre.nextval, genre
+insert into anime_genre(genre_pk, genre_tx)
+select seq_anime_genre.nextval, genre
 from (
 
         SELECT   Trim(data_single) genre
@@ -53,7 +69,7 @@ from (
                ------- [^,]  && instr( listed_in, ',', 1, LEVEL - 1)
                SELECT Regexp_substr(replace(replace(replace(genre,''''),'['),']'), '[^,]+', 1, dataList.column_value)
                       data_single
-                FROM   anime_stage a,--change to match your stage table
+                FROM   anime_stage a,
                        TABLE (Cast (MULTISET (SELECT LEVEL
                                        FROM   dual
                                        CONNECT BY Instr(replace(replace(replace(genre,''''),'['),']'), ',', 1, LEVEL - 1) >
@@ -63,13 +79,16 @@ from (
                )--A Close
         WHERE  Trim(data_single) IS NOT NULL 
         minus
-        select name_tx
-        from zx_anime_genre
+        select genre_tx
+        from anime_genre
 );
 
 
-insert into zx_anime_producer(producer_pk, name_tx)
-select seq_zx_anime_producer.nextval, producer
+--- Anime_Producer TABLE ---
+create sequence seq_anime_producer;
+
+insert into anime_producer(producer_pk, producer_tx)
+select seq_anime_producer.nextval, producer
 from (
 
         SELECT   Trim(data_single) producer
@@ -91,14 +110,15 @@ from (
                )--A Close
         WHERE  Trim(data_single) IS NOT NULL 
         minus
-        select name_tx
-        from zx_anime_producer
+        select producer_tx
+        from anime_producer
 );
 
-create sequence seq_zx_anime_studio;
+--- Anime_Studio TABLE ---
+create sequence seq_anime_studio;
 
-insert into zx_anime_studio(studio_pk, name_tx)
-select seq_zx_anime_studio.nextval, studio
+insert into anime_studio(studio_pk, studio_tx)
+select seq_anime_studio.nextval, studio
 from (
 
         SELECT   Trim(data_single) studio
@@ -120,19 +140,22 @@ from (
                )--A Close
         WHERE  Trim(data_single) IS NOT NULL 
         minus
-        select name_tx
-        from zx_anime_studio
+        select studio_tx
+        from anime_studio
 );
 
 
 
-----------------------------insert an_genre, an_producer, an_studio table----------------------------------------------------
-create sequence seq_zx_anime_an_genre;
 
-insert into zx_anime_an_genre(an_genre_pk, anime_fk, genre_fk)
+----------------------------Insert ANIME_AN_GENRE, ANIME_AN_PRODUCER, ANIME_AN_STUDIO table----------------------------------------------------
+
+--- ANIME_AN_GENRE ---
+create sequence seq_anime_an_genre;
+
+insert into anime_an_genre(an_genre_pk, anime_fk, genre_fk)
  
-     select seq_zx_anime_an_genre.nextval,  anime_pk,   genre_pk
-     from (select  zx_anime_anime.anime_pk,  zx_anime_genre.genre_pk
+     select seq_anime_an_genre.nextval,  anime_pk,   genre_pk
+     from (select  anime_anime.anime_pk,  anime_genre.genre_pk
                 from (SELECT distinct anime_id, Trim(data_single) genre
                             FROM   (--A Open
                                    -------------------------this is the data from STAGE -------------------------
@@ -152,24 +175,24 @@ insert into zx_anime_an_genre(an_genre_pk, anime_fk, genre_fk)
                                    )--A Close
                             WHERE  Trim(data_single) IS NOT NULL 
                     ) stageData
-                      join zx_anime_anime
-                    on (stageData.anime_id = zx_anime_anime.anime_id)
-                      join zx_anime_genre
-                    on (stageData.genre = zx_anime_genre.name_tx)
+                      join anime_anime
+                    on (stageData.anime_id = anime_anime.anime_id)
+                      join anime_genre
+                    on (stageData.genre = anime_genre.name_tx)
                     minus
                     select anime_fk, genre_fk 
-                   from zx_anime_an_genre
+                   from anime_an_genre
        );
 
 
-select * from zx_anime_an_producer;
-create sequence seq_zx_anime_an_producer;
 
+--- ANIME_AN_PRODUCER ---
+create sequence seq_anime_an_producer;
 
-insert into zx_anime_an_producer(an_producer_pk, anime_fk, producer_fk)
+insert into anime_an_producer(an_producer_pk, anime_fk, producer_fk)
  
-     select seq_zx_anime_an_producer.nextval,  anime_pk,   producer_pk
-     from (select  zx_anime_anime.anime_pk,  zx_anime_producer.producer_pk
+     select seq_anime_an_producer.nextval,  anime_pk,   producer_pk
+     from (select  anime_anime.anime_pk,  zx_anime_producer.producer_pk
                 from (SELECT distinct anime_id, Trim(data_single) producer
                             FROM   (--A Open
                                    -------------------------this is the data from STAGE -------------------------
@@ -189,24 +212,23 @@ insert into zx_anime_an_producer(an_producer_pk, anime_fk, producer_fk)
                                    )--A Close
                             WHERE  Trim(data_single) IS NOT NULL 
                     ) stageData
-                      join zx_anime_anime
-                    on (stageData.anime_id = zx_anime_anime.anime_id)
-                      join zx_anime_producer
-                    on (stageData.producer = zx_anime_producer.name_tx)
+                      join anime_anime
+                    on (stageData.anime_id = anime_anime.anime_id)
+                      join anime_producer
+                    on (stageData.producer = anime_producer.name_tx)
                     minus
                     select anime_fk, producer_fk 
-                   from zx_anime_an_producer
+                   from anime_an_producer
        );
        
-       
-select * from zx_anime_an_studio;
-create sequence seq_zx_anime_an_studio;
 
+--- ANIME_AN_STUDIO ---      
+create sequence seq_anime_an_studio;
 
-insert into zx_anime_an_studio(an_studio_pk, anime_fk, studio_fk)
+insert into anime_an_studio(an_studio_pk, anime_fk, studio_fk)
  
-     select seq_zx_anime_an_studio.nextval,  anime_pk,   studio_pk
-     from (select  zx_anime_anime.anime_pk,  zx_anime_studio.studio_pk
+     select seq_anime_an_studio.nextval,  anime_pk,   studio_pk
+     from (select  anime_anime.anime_pk,  anime_studio.studio_pk
                 from (SELECT distinct anime_id, Trim(data_single) studio
                             FROM   (--A Open
                                    -------------------------this is the data from STAGE -------------------------
@@ -226,13 +248,13 @@ insert into zx_anime_an_studio(an_studio_pk, anime_fk, studio_fk)
                                    )--A Close
                             WHERE  Trim(data_single) IS NOT NULL 
                     ) stageData
-                      join zx_anime_anime
-                    on (stageData.anime_id = zx_anime_anime.anime_id)
-                      join zx_anime_studio
-                    on (stageData.studio = zx_anime_studio.name_tx)
+                      join anime_anime
+                    on (stageData.anime_id = anime_anime.anime_id)
+                      join anime_studio
+                    on (stageData.studio = anime_studio.name_tx)
                     minus
                     select anime_fk, studio_fk 
-                   from zx_anime_an_studio
+                   from anime_an_studio
        );
 
 
