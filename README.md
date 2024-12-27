@@ -28,6 +28,7 @@ The goal of this project is to design and implement a relational database for ma
 | `Populating_data`     | SQL script or instructions for populating tables with sample data.            |
 | `README.md`           | Documentation file providing project details.                             |
 | `Table_creation`      | SQL script for creating database tables and relationships.                        |
+| `Testing`             | SQL script for checking views.        |
 | `Views`               | SQL script for creating database views. |
 
 
@@ -42,7 +43,7 @@ The goal of this project is to design and implement a relational database for ma
 * Run the Populating_data script to insert Anime_Stage data into the tables. 
 #### 4. Verify Views
 * Execute the Views script to create pre-defined database views.
-* Run the testing file to see the views.
+* Run the testing file line by line to see the views.
 
 
 
