@@ -52,7 +52,7 @@ where type ='Unknown';
 
   
 
--- Studios or Producers which are associated with the highest rating and highest popularity of anime
+-- Studios and Producers which are associated with the highest rating and highest popularity of anime
 
 create view ZX_ANIME_STUDIO_PRODUCER_HIGHEST_RATING 
 as
